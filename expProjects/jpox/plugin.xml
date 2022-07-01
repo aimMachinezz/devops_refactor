@@ -1,0 +1,549 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<!--**********************************************************************
+Copyright (c) 2006 Erik Bengtson and others. All rights reserved.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+2006 Andy Jefferson - added annotations extension point
+2006 Andy Jefferson - added enhancer extension point
+2006 Andy Jefferson - added datasource extension point
+2006 Andy Jefferson - added L2 cache, value generators, etc
+    ...
+**********************************************************************-->
+<plugin id="org.jpox" name="JPOX Core" provider-name="JPOX">
+    <extension-point id="datasource" name="Datasource" schema="schema/datasource.exsd"/>
+    <extension-point id="cache_level1" name="Level1 Cache" schema="schema/cache_level1.exsd"/>
+    <extension-point id="cache_level2" name="Level2 Cache" schema="schema/cache_level2.exsd"/>
+    <extension-point id="store_datastoremapping" name="Datastore Mapping" schema="schema/datastoremapping.exsd"/>
+    <extension-point id="store_mapping" name="Types Mapping" schema="schema/mapping.exsd"/>
+    <extension-point id="store_datastoreadapter" name="Datastore Adapter" schema="schema/datastoreadapter.exsd"/>
+    <extension-point id="store_valuegenerator" name="Value Generator" schema="schema/valuegenerator.exsd"/>
+    <extension-point id="store_identifierfactory" name="Identifier Factory" schema="schema/identifierfactory.exsd"/>
+    <extension-point id="store_expression_scalarexpression" name="Scalar Expression" schema="schema/scalarexpression.exsd"/>
+    <extension-point id="store_query_query" name="Query" schema="schema/query.exsd"/>
+    <extension-point id="api_adapter" name="Api Adapter" schema="schema/apidapter.exsd"/>
+    <extension-point id="store_manager" name="Store Manager" schema="schema/store_manager.exsd"/>
+    <extension-point id="implementation_creator" name="Implementation Creator" schema="schema/implementation_creator.exsd"/>
+    <extension-point id="autostart" name="AutoStartMechanism" schema="schema/autostart.exsd"/>
+    <extension-point id="classloader_resolver" name="ClassLoader Resolver" schema="schema/classloader_resolver.exsd"/>
+    <extension-point id="callbackhandler" name="Callback Handler" schema="schema/callbackhandler.exsd"/>
+    <extension-point id="metadata_handler" name="MetaData Handler" schema="schema/metadata_handler.exsd"/>
+
+    <!-- LEVEL1 CACHES -->
+    <extension point="org.jpox.cache_level1">
+        <cache name="WEAK" class-name="org.jpox.cache.WeakRefCache"/>
+        <cache name="SOFT" class-name="org.jpox.cache.SoftRefCache"/>
+        <cache name="HARD" class-name="org.jpox.cache.HardRefCache"/>
+    </extension>
+
+    <!-- LEVEL2 CACHES -->
+    <extension point="org.jpox.cache_level2">
+        <cache name="DEFAULT" class-name="org.jpox.cache.DefaultLevel2Cache"/>
+        <cache name="SOFT" class-name="org.jpox.cache.SoftLevel2Cache"/>
+    </extension>
+
+    <!-- VALUE GENERATORS -->
+    <extension point="org.jpox.store_valuegenerator">
+        <valuegenerator name="auid" class-name="org.jpox.store.poid.AUIDPoidGenerator" unique="true"/>
+        <valuegenerator name="uuid-hex" class-name="org.jpox.store.poid.UUIDHexPoidGenerator" unique="true"/>
+        <valuegenerator name="uuid-string" class-name="org.jpox.store.poid.UUIDStringPoidGenerator" unique="true"/>
+        <valuegenerator name="increment" class-name="org.jpox.store.rdbms.poid.SequenceTablePoidGenerator"/>
+        <valuegenerator name="sequence" class-name="org.jpox.store.rdbms.poid.SequencePoidGenerator"/>
+        <valuegenerator name="max" class-name="org.jpox.store.rdbms.poid.MaxPoidGenerator"/>
+        <valuegenerator name="datastore-uuid-hex" class-name="org.jpox.store.rdbms.poid.DatastoreUUIDHexPoidGenerator"/>
+    </extension>
+
+    <!-- IDENTIFIER FACTORIES -->
+    <extension point="org.jpox.store_identifierfactory">
+        <identifierfactory name="jpox" class-name="org.jpox.store.rdbms.sqlidentifier.JPOXIdentifierFactory"/>
+        <identifierfactory name="jpox2" class-name="org.jpox.store.rdbms.sqlidentifier.JPOX2IdentifierFactory"/>
+        <identifierfactory name="jpa" class-name="org.jpox.store.rdbms.sqlidentifier.JPAIdentifierFactory"/>
+    </extension>
+
+    <!-- JAVA TYPES MAPPING -->
+    <extension point="org.jpox.store_mapping">
+        <!-- "primitive" types -->
+        <mapping java-type="boolean" mapping-class="org.jpox.store.mapping.BooleanMapping" default-persistent="true" default-fetch-group="true" default-embedded="true"/>
+        <mapping java-type="byte" mapping-class="org.jpox.store.mapping.ByteMapping" default-persistent="true" default-fetch-group="true" default-embedded="true"/>
+        <mapping java-type="char" mapping-class="org.jpox.store.mapping.CharacterMapping" default-persistent="true" default-fetch-group="true" default-embedded="true"/>
+        <mapping java-type="short" mapping-class="org.jpox.store.mapping.ShortMapping" default-persistent="true" default-fetch-group="true" default-embedded="true"/>
+        <mapping java-type="int" mapping-class="org.jpox.store.mapping.IntegerMapping" default-persistent="true" default-fetch-group="true" default-embedded="true"/>
+        <mapping java-type="long" mapping-class="org.jpox.store.mapping.LongMapping" default-persistent="true" default-fetch-group="true" default-embedded="true"/>
+        <mapping java-type="float" mapping-class="org.jpox.store.mapping.FloatMapping" default-persistent="true" default-fetch-group="true" default-embedded="true"/>
+        <mapping java-type="double" mapping-class="org.jpox.store.mapping.DoubleMapping" default-persistent="true" default-fetch-group="true" default-embedded="true"/>
+    
+        <!-- "primitive wrapper" types -->
+        <mapping java-type="java.lang.Boolean" mapping-class="org.jpox.store.mapping.BooleanMapping" default-persistent="true" default-fetch-group="true" default-embedded="true"/>
+        <mapping java-type="java.lang.Byte" mapping-class="org.jpox.store.mapping.ByteMapping" default-persistent="true" default-fetch-group="true" default-embedded="true"/>
+        <mapping java-type="java.lang.Character" mapping-class="org.jpox.store.mapping.CharacterMapping" default-persistent="true" default-fetch-group="true" default-embedded="true"/>
+        <mapping java-type="java.lang.Short" mapping-class="org.jpox.store.mapping.ShortMapping" default-persistent="true" default-fetch-group="true" default-embedded="true"/>
+        <mapping java-type="java.lang.Integer" mapping-class="org.jpox.store.mapping.IntegerMapping" default-persistent="true" default-fetch-group="true" default-embedded="true"/>
+        <mapping java-type="java.lang.Long" mapping-class="org.jpox.store.mapping.LongMapping" default-persistent="true" default-fetch-group="true" default-embedded="true"/>
+        <mapping java-type="java.lang.Float" mapping-class="org.jpox.store.mapping.FloatMapping" default-persistent="true" default-fetch-group="true" default-embedded="true"/>
+        <mapping java-type="java.lang.Double" mapping-class="org.jpox.store.mapping.DoubleMapping" default-persistent="true" default-fetch-group="true" default-embedded="true"/>
+
+        <!-- "java.math" types -->
+        <mapping java-type="java.math.BigDecimal" mapping-class="org.jpox.store.mapping.BigDecimalMapping" 
+            default-persistent="true" default-fetch-group="true" default-embedded="true"/>
+        <mapping java-type="java.math.BigInteger" mapping-class="org.jpox.store.mapping.BigIntegerMapping" 
+            default-persistent="true" default-fetch-group="true" default-embedded="true"/>
+
+        <!-- "java.util" types -->
+        <mapping java-type="java.util.Date" mapping-class="org.jpox.store.mapping.DateMapping" sco-wrapper="org.jpox.sco.Date" 
+            default-persistent="true" default-fetch-group="true" default-embedded="true"/>
+        <mapping java-type="java.util.Locale" mapping-class="org.jpox.store.mapping.LocaleMapping" default-persistent="true" 
+            default-embedded="true"/>
+        <mapping java-type="java.util.TimeZone" mapping-class="org.jpox.store.mapping.TimeZoneMapping"/>
+        <mapping java-type="java.util.Calendar" mapping-class="org.jpox.store.mapping.GregorianCalendarMapping" 
+            sco-wrapper="org.jpox.sco.GregorianCalendar"/>
+
+        <!-- "java.sql" types -->
+        <mapping java-type="java.sql.Date" mapping-class="org.jpox.store.mapping.SqlDateMapping" sco-wrapper="org.jpox.sco.SqlDate"/>
+        <mapping java-type="java.sql.Time" mapping-class="org.jpox.store.mapping.SqlTimeMapping" sco-wrapper="org.jpox.sco.SqlTime"/>
+        <mapping java-type="java.sql.Timestamp" mapping-class="org.jpox.store.mapping.SqlTimestampMapping" sco-wrapper="org.jpox.sco.SqlTimestamp"/>
+
+        <!-- other jdk types -->
+        <mapping java-type="java.lang.String" mapping-class="org.jpox.store.mapping.StringMapping" default-persistent="true" default-fetch-group="true" default-embedded="true"/>
+        <mapping java-type="java.awt.Color" mapping-class="org.jpox.store.mapping.ColorMapping"/>
+        <mapping java-type="java.awt.Point" mapping-class="org.jpox.store.mapping.PointMapping" sco-wrapper="org.jpox.sco.Point"/>
+        <mapping java-type="java.lang.Number" default-persistent="true" default-fetch-group="true" default-embedded="true"/>
+        <mapping java-type="java.lang.Object" mapping-class="org.jpox.store.mapping.SerialisedMapping"/>
+        <mapping java-type="java.io.Serializable" mapping-class="org.jpox.store.mapping.SerialisedMapping"/>
+        <mapping java-type="java.net.URL" mapping-class="org.jpox.store.mapping.URLMapping"/>
+        <mapping java-type="java.awt.image.BufferedImage" mapping-class="org.jpox.store.mapping.BufferedImageMapping"/>
+
+        <!-- array types -->
+        <mapping java-type="[Z" mapping-class="org.jpox.store.mapping.ArrayMapping" default-persistent="true" default-embedded="true"/>
+        <mapping java-type="[B" mapping-class="org.jpox.store.mapping.ArrayMapping" default-persistent="true" default-embedded="true"/>
+        <mapping java-type="[C" mapping-class="org.jpox.store.mapping.ArrayMapping" default-persistent="true" default-embedded="true"/>
+        <mapping java-type="[D" mapping-class="org.jpox.store.mapping.ArrayMapping" default-persistent="true" default-embedded="true"/>
+        <mapping java-type="[F" mapping-class="org.jpox.store.mapping.ArrayMapping" default-persistent="true" default-embedded="true"/>
+        <mapping java-type="[I" mapping-class="org.jpox.store.mapping.ArrayMapping" default-persistent="true" default-embedded="true"/>
+        <mapping java-type="[J" mapping-class="org.jpox.store.mapping.ArrayMapping" default-persistent="true" default-embedded="true"/>
+        <mapping java-type="[S" mapping-class="org.jpox.store.mapping.ArrayMapping" default-persistent="true" default-embedded="true"/>
+    
+        <mapping java-type="[Ljava.lang.Boolean;" mapping-class="org.jpox.store.mapping.ArrayMapping" default-persistent="true" default-embedded="true"/>
+        <mapping java-type="[Ljava.lang.Byte;" mapping-class="org.jpox.store.mapping.ArrayMapping" default-persistent="true" default-embedded="true"/>
+        <mapping java-type="[Ljava.lang.Character;" mapping-class="org.jpox.store.mapping.ArrayMapping" default-persistent="true" default-embedded="true"/>
+        <mapping java-type="[Ljava.lang.Double;" mapping-class="org.jpox.store.mapping.ArrayMapping" default-persistent="true" default-embedded="true"/>
+        <mapping java-type="[Ljava.lang.Float;" mapping-class="org.jpox.store.mapping.ArrayMapping" default-persistent="true" default-embedded="true"/>
+        <mapping java-type="[Ljava.lang.Integer;" mapping-class="org.jpox.store.mapping.ArrayMapping" default-persistent="true" default-embedded="true"/>
+        <mapping java-type="[Ljava.lang.Long;" mapping-class="org.jpox.store.mapping.ArrayMapping" default-persistent="true" default-embedded="true"/>
+        <mapping java-type="[Ljava.lang.Short;" mapping-class="org.jpox.store.mapping.ArrayMapping" default-persistent="true" default-embedded="true"/>
+    
+        <mapping java-type="[Ljava.lang.String;" mapping-class="org.jpox.store.mapping.ArrayMapping" default-persistent="true" default-embedded="true"/>
+        <mapping java-type="[Ljava.lang.Number;" mapping-class="org.jpox.store.mapping.ArrayMapping" default-persistent="true" default-embedded="true"/>
+        <mapping java-type="[Ljava.util.Date;" mapping-class="org.jpox.store.mapping.ArrayMapping" default-persistent="true" default-embedded="true"/>
+        <mapping java-type="[Ljava.util.Locale;" mapping-class="org.jpox.store.mapping.ArrayMapping" default-persistent="true" default-embedded="true"/>
+        <mapping java-type="[Ljava.math.BigInteger;" mapping-class="org.jpox.store.mapping.ArrayMapping" default-persistent="true" default-embedded="true"/>
+        <mapping java-type="[Ljava.math.BigDecimal;" mapping-class="org.jpox.store.mapping.ArrayMapping" default-persistent="true" default-embedded="true"/>
+    
+        <!-- container types -->
+        <mapping java-type="java.util.ArrayList" mapping-class="org.jpox.store.mapping.CollectionMapping" sco-wrapper="org.jpox.sco.ArrayList" default-persistent="true"/>
+        <mapping java-type="java.util.Collection" mapping-class="org.jpox.store.mapping.CollectionMapping" sco-wrapper="org.jpox.sco.Collection" default-persistent="true"/>
+        <mapping java-type="java.util.HashMap" mapping-class="org.jpox.store.mapping.MapMapping" sco-wrapper="org.jpox.sco.HashMap" default-persistent="true"/>
+        <mapping java-type="java.util.HashSet" mapping-class="org.jpox.store.mapping.CollectionMapping" sco-wrapper="org.jpox.sco.HashSet" default-persistent="true"/>
+        <mapping java-type="java.util.Hashtable" mapping-class="org.jpox.store.mapping.MapMapping" sco-wrapper="org.jpox.sco.Hashtable" default-persistent="true"/>
+        <mapping java-type="java.util.LinkedList" mapping-class="org.jpox.store.mapping.CollectionMapping" sco-wrapper="org.jpox.sco.LinkedList" default-persistent="true"/>
+        <mapping java-type="java.util.List" mapping-class="org.jpox.store.mapping.CollectionMapping" sco-wrapper="org.jpox.sco.List" default-persistent="true"/>
+        <mapping java-type="java.util.Map" mapping-class="org.jpox.store.mapping.MapMapping" sco-wrapper="org.jpox.sco.Map" default-persistent="true"/>
+        <mapping java-type="java.util.Set" mapping-class="org.jpox.store.mapping.CollectionMapping" sco-wrapper="org.jpox.sco.Set" default-persistent="true"/>
+        <mapping java-type="java.util.SortedMap" mapping-class="org.jpox.store.mapping.MapMapping" sco-wrapper="org.jpox.sco.SortedMap"/>
+        <mapping java-type="java.util.SortedSet" mapping-class="org.jpox.store.mapping.CollectionMapping" sco-wrapper="org.jpox.sco.SortedSet"/>
+        <mapping java-type="java.util.Stack" mapping-class="org.jpox.store.mapping.CollectionMapping" sco-wrapper="org.jpox.sco.Stack"/>
+        <mapping java-type="java.util.TreeMap" mapping-class="org.jpox.store.mapping.MapMapping" sco-wrapper="org.jpox.sco.TreeMap" default-persistent="true"/>
+        <mapping java-type="java.util.TreeSet" mapping-class="org.jpox.store.mapping.CollectionMapping" sco-wrapper="org.jpox.sco.TreeSet" default-persistent="true"/>
+        <mapping java-type="java.util.Vector" mapping-class="org.jpox.store.mapping.CollectionMapping" sco-wrapper="org.jpox.sco.Vector" default-persistent="true"/>
+        <mapping java-type="java.util.Properties" mapping-class="org.jpox.store.mapping.MapMapping" sco-wrapper="org.jpox.sco.Properties"/>
+    
+        <!-- JPOX types -->
+        <mapping java-type="org.jpox.store.OID" mapping-class="org.jpox.store.mapping.OIDMapping"/>
+        <mapping java-type="org.jpox.sco.ArrayList" mapping-class="org.jpox.store.mapping.CollectionMapping" sco-wrapper="org.jpox.sco.ArrayList" default-persistent="true"/>
+        <mapping java-type="org.jpox.sco.Collection" mapping-class="org.jpox.store.mapping.CollectionMapping" sco-wrapper="org.jpox.sco.Collection" default-persistent="true"/>
+        <mapping java-type="org.jpox.sco.HashMap" mapping-class="org.jpox.store.mapping.MapMapping" sco-wrapper="org.jpox.sco.HashMap" default-persistent="true"/>
+        <mapping java-type="org.jpox.sco.HashSet" mapping-class="org.jpox.store.mapping.CollectionMapping" sco-wrapper="org.jpox.sco.HashSet" default-persistent="true"/>
+        <mapping java-type="org.jpox.sco.Hashtable" mapping-class="org.jpox.store.mapping.MapMapping" sco-wrapper="org.jpox.sco.Hashtable" default-persistent="true"/>
+        <mapping java-type="org.jpox.sco.LinkedList" mapping-class="org.jpox.store.mapping.CollectionMapping" sco-wrapper="org.jpox.sco.LinkedList" default-persistent="true"/>
+        <mapping java-type="org.jpox.sco.List" mapping-class="org.jpox.store.mapping.CollectionMapping" sco-wrapper="org.jpox.sco.List" default-persistent="true"/>
+        <mapping java-type="org.jpox.sco.Map" mapping-class="org.jpox.store.mapping.MapMapping" sco-wrapper="org.jpox.sco.Map" default-persistent="true"/>
+        <mapping java-type="org.jpox.sco.Set" mapping-class="org.jpox.store.mapping.CollectionMapping" sco-wrapper="org.jpox.sco.Set" default-persistent="true"/>
+        <mapping java-type="org.jpox.sco.SortedMap" mapping-class="org.jpox.store.mapping.MapMapping" sco-wrapper="org.jpox.sco.SortedMap"/>
+        <mapping java-type="org.jpox.sco.SortedSet" mapping-class="org.jpox.store.mapping.CollectionMapping" sco-wrapper="org.jpox.sco.SortedSet"/>
+        <mapping java-type="org.jpox.sco.Stack" mapping-class="org.jpox.store.mapping.CollectionMapping" sco-wrapper="org.jpox.sco.Stack"/>
+        <mapping java-type="org.jpox.sco.TreeMap" mapping-class="org.jpox.store.mapping.MapMapping" sco-wrapper="org.jpox.sco.TreeMap" default-persistent="true"/>
+        <mapping java-type="org.jpox.sco.TreeSet" mapping-class="org.jpox.store.mapping.CollectionMapping" sco-wrapper="org.jpox.sco.TreeSet" default-persistent="true"/>
+        <mapping java-type="org.jpox.sco.Vector" mapping-class="org.jpox.store.mapping.CollectionMapping" sco-wrapper="org.jpox.sco.Vector" default-persistent="true"/>
+        <mapping java-type="org.jpox.sco.Properties" mapping-class="org.jpox.store.mapping.MapMapping" sco-wrapper="org.jpox.sco.Properties"/>
+    
+        <!--1.3 only -->
+        <mapping java-type="java.util.BitSet" mapping-class="org.jpox.store.mapping.BitSetMapping" sco-wrapper="org.jpox.sco.BitSet" java-version="1.3" java-version-restricted="true"/>
+        <mapping java-type="java.util.GregorianCalendar" mapping-class="org.jpox.store.mapping.GregorianCalendarMapping" sco-wrapper="org.jpox.sco.GregorianCalendar" java-version="1.3" java-version-restricted="true"/>
+    
+        <!--1.4 or above -->
+        <mapping java-type="java.util.Currency" mapping-class="org.jpox.store.mapping.CurrencyMapping" java-version="1.4" default-persistent="true" default-embedded="true"/>
+        <mapping java-type="java.util.LinkedHashSet" mapping-class="org.jpox.store.mapping.CollectionMapping" sco-wrapper="org.jpox.sco.LinkedHashSet" java-version="1.4" default-persistent="true"/>
+        <mapping java-type="java.util.LinkedHashMap" mapping-class="org.jpox.store.mapping.MapMapping" sco-wrapper="org.jpox.sco.LinkedHashMap" java-version="1.4" default-persistent="true"/>
+        <mapping java-type="org.jpox.sco.LinkedHashSet" mapping-class="org.jpox.store.mapping.CollectionMapping" sco-wrapper="org.jpox.sco.LinkedHashSet" java-version="1.4" default-persistent="true"/>
+        <mapping java-type="org.jpox.sco.LinkedHashMap" mapping-class="org.jpox.store.mapping.MapMapping" sco-wrapper="org.jpox.sco.LinkedHashMap" java-version="1.4" default-persistent="true"/>
+        <mapping java-type="java.util.BitSet" mapping-class="org.jpox.store.mapping.BitSetMapping" sco-wrapper="org.jpox.sco.BitSetJDK14" java-version="1.4"/>
+        <mapping java-type="java.util.GregorianCalendar" mapping-class="org.jpox.store.mapping.GregorianCalendarMapping" sco-wrapper="org.jpox.sco.GregorianCalendarJDK14" java-version="1.4"/>
+        <mapping java-type="java.net.URI" mapping-class="org.jpox.store.mapping.URIMapping" java-version="1.4"/>
+
+        <!--1.5 or above -->
+        <mapping java-type="java.util.UUID" mapping-class="org.jpox.store.mapping.UUIDMapping" java-version="1.5"/>
+        <mapping java-type="java.util.Queue" mapping-class="org.jpox.store.mapping.CollectionMapping" 
+            sco-wrapper="org.jpox.sco.Queue" java-version="1.5"/>
+        <mapping java-type="java.util.PriorityQueue" mapping-class="org.jpox.store.mapping.CollectionMapping" 
+            sco-wrapper="org.jpox.sco.PriorityQueue" java-version="1.5"/>
+        <mapping java-type="org.jpox.sco.Queue" mapping-class="org.jpox.store.mapping.CollectionMapping" 
+            sco-wrapper="org.jpox.sco.Queue" java-version="1.5"/>
+        <mapping java-type="org.jpox.sco.PriorityQueue" mapping-class="org.jpox.store.mapping.CollectionMapping" 
+            sco-wrapper="org.jpox.sco.PriorityQueue" java-version="1.5"/>
+    </extension>
+
+    <!-- DATASTORE TYPES MAPPING -->
+    <!--
+    DB2 : JDBC TINYINT, BIT not supported
+    Derby : JDBC TINYINT, BIT not supported, SQL INT types are alias to the SQL INTEGER type
+    Firebird : JDBC BIT not supported
+    H2 : JDBC BIT not supported
+    HSQL : JDBC BIT not supported
+    MSSQL : JDBC TINYINT, DOUBLE, DATE, TIME not supported, JDBC INTEGER not supported (uses INT instead)
+    Informix : JDBC DOUBLE not supported
+    Oracle : (TODO)
+    Pointbase : JDBC BIT not supported
+    PostgreSQL : JDBC TINYINT, DECIMAL, FLOAT not supported
+    MaxDB/SAPDB : JDBC TINYINT, BIT, BIGINT, NUMERIC not supported, SQL INT types are alias to the SQL INTEGER type
+    Sybase : JDBC FLOAT, BIGINT not supported, SQL INT types are alias to the SQL INTEGER type
+    -->
+    <extension point="org.jpox.store_datastoremapping">
+        <mapping java-type="java.lang.Boolean" rdbms-mapping-class="org.jpox.store.rdbms.mapping.BitRDBMSMapping" jdbc-type="BIT" sql-type="BIT" default="true">
+            <excludes vendor-id="db2"/>
+            <excludes vendor-id="derby"/>
+            <excludes vendor-id="pointbase"/>
+            <excludes vendor-id="firebird"/>
+            <excludes vendor-id="hsql"/>
+            <excludes vendor-id="h2"/>
+            <excludes vendor-id="sapdb"/>
+        </mapping>
+        <mapping java-type="java.lang.Boolean" rdbms-mapping-class="org.jpox.store.rdbms.mapping.CharRDBMSMapping" jdbc-type="CHAR" sql-type="CHAR" default="false"/>
+        <mapping java-type="java.lang.Boolean" rdbms-mapping-class="org.jpox.store.rdbms.mapping.BooleanRDBMSMapping" jdbc-type="BOOLEAN" sql-type="BOOLEAN" default="false"/>
+        <mapping java-type="java.lang.Boolean" rdbms-mapping-class="org.jpox.store.rdbms.mapping.TinyIntRDBMSMapping" jdbc-type="TINYINT" sql-type="TINYINT" default="false">
+            <excludes vendor-id="sapdb"/>
+            <excludes vendor-id="derby"/>
+            <excludes vendor-id="sqlserver"/>
+            <excludes vendor-id="db2"/>
+            <excludes vendor-id="postgresql"/>
+        </mapping>
+        <mapping java-type="java.lang.Boolean" rdbms-mapping-class="org.jpox.store.rdbms.mapping.SmallIntRDBMSMapping" jdbc-type="SMALLINT" sql-type="SMALLINT" default="false"/>
+        <mapping java-type="java.lang.Boolean" rdbms-mapping-class="org.jpox.store.rdbms.mapping.CharRDBMSMapping" jdbc-type="CHAR" sql-type="CHAR" default="true">
+            <includes vendor-id="db2"/>
+            <includes vendor-id="derby"/>
+            <includes vendor-id="firebird"/>
+            <includes vendor-id="pointbase"/>
+            <includes vendor-id="sapdb"/>
+        </mapping>
+        <mapping java-type="java.lang.Boolean" rdbms-mapping-class="org.jpox.store.rdbms.mapping.CharRDBMSMapping" jdbc-type="BOOLEAN" sql-type="BOOLEAN" default="true">
+            <includes vendor-id="hsql"/>
+        </mapping>
+        <mapping java-type="java.lang.Boolean" rdbms-mapping-class="org.jpox.store.rdbms.mapping.NumericRDBMSMapping" jdbc-type="NUMERIC" sql-type="NUMERIC" default="true">
+            <includes vendor-id="oracle"/>
+        </mapping>
+
+        <mapping java-type="java.lang.Byte" rdbms-mapping-class="org.jpox.store.rdbms.mapping.TinyIntRDBMSMapping" jdbc-type="TINYINT" sql-type="TINYINT" default="true">
+            <excludes vendor-id="sapdb"/>
+            <excludes vendor-id="derby"/>
+            <excludes vendor-id="sqlserver"/>
+            <excludes vendor-id="db2"/>
+            <excludes vendor-id="postgresql"/>
+        </mapping>
+        <mapping java-type="java.lang.Byte" rdbms-mapping-class="org.jpox.store.rdbms.mapping.SmallIntRDBMSMapping" jdbc-type="SMALLINT" sql-type="SMALLINT" default="false"/>
+        <mapping java-type="java.lang.Byte" rdbms-mapping-class="org.jpox.store.rdbms.mapping.NumericRDBMSMapping" jdbc-type="NUMERIC" sql-type="NUMERIC" default="true">
+            <includes vendor-id="oracle"/>
+        </mapping>
+
+        <mapping java-type="java.lang.Character" rdbms-mapping-class="org.jpox.store.rdbms.mapping.CharRDBMSMapping" jdbc-type="CHAR" sql-type="CHAR" default="true"/>
+        <mapping java-type="java.lang.Character" rdbms-mapping-class="org.jpox.store.rdbms.mapping.IntegerRDBMSMapping" jdbc-type="INTEGER" sql-type="INTEGER" default="false">
+            <excludes vendor-id="sqlserver"/>
+        </mapping>
+        <mapping java-type="java.lang.Character" rdbms-mapping-class="org.jpox.store.rdbms.mapping.IntegerRDBMSMapping" jdbc-type="INTEGER" sql-type="INT" default="false">
+            <includes vendor-id="derby"/>
+            <includes vendor-id="sapdb"/>
+            <includes vendor-id="sqlserver"/>
+            <includes vendor-id="sybase"/>
+        </mapping>
+        <mapping java-type="java.lang.Character" rdbms-mapping-class="org.jpox.store.rdbms.mapping.NumericRDBMSMapping" jdbc-type="NUMERIC" sql-type="NUMERIC" default="true">
+            <includes vendor-id="oracle"/>
+        </mapping>
+
+        <mapping java-type="java.lang.Double" rdbms-mapping-class="org.jpox.store.rdbms.mapping.DoubleRDBMSMapping" jdbc-type="DOUBLE" sql-type="DOUBLE" default="true">
+            <excludes vendor-id="sqlserver"/>
+            <excludes vendor-id="informix"/>
+        </mapping>
+        <mapping java-type="java.lang.Double" rdbms-mapping-class="org.jpox.store.rdbms.mapping.DecimalRDBMSMapping" jdbc-type="DECIMAL" sql-type="DECIMAL" default="false">
+            <excludes vendor-id="postgresql"/>
+        </mapping>
+        <mapping java-type="java.lang.Double" rdbms-mapping-class="org.jpox.store.rdbms.mapping.FloatRDBMSMapping" jdbc-type="FLOAT" sql-type="FLOAT" default="true">
+            <includes vendor-id="sqlserver"/>
+            <includes vendor-id="informix"/>
+            <includes vendor-id="oracle"/>
+        </mapping>
+
+        <mapping java-type="java.lang.Float" rdbms-mapping-class="org.jpox.store.rdbms.mapping.FloatRDBMSMapping" jdbc-type="FLOAT" sql-type="FLOAT" default="true">
+            <excludes vendor-id="postgresql"/>
+            <excludes vendor-id="sybase"/>
+        </mapping>
+        <mapping java-type="java.lang.Float" rdbms-mapping-class="org.jpox.store.rdbms.mapping.DoubleRDBMSMapping" jdbc-type="DOUBLE" sql-type="DOUBLE" default="false">
+            <excludes vendor-id="sqlserver"/>
+            <excludes vendor-id="informix"/>
+        </mapping>
+        <mapping java-type="java.lang.Float" rdbms-mapping-class="org.jpox.store.rdbms.mapping.RealRDBMSMapping" jdbc-type="REAL" sql-type="REAL" default="false"/>
+        <mapping java-type="java.lang.Float" rdbms-mapping-class="org.jpox.store.rdbms.mapping.DecimalRDBMSMapping" jdbc-type="DECIMAL" sql-type="DECIMAL" default="false">
+            <excludes vendor-id="postgresql"/>
+        </mapping>
+        <mapping java-type="java.lang.Float" rdbms-mapping-class="org.jpox.store.rdbms.mapping.DoubleRDBMSMapping" jdbc-type="DOUBLE" sql-type="DOUBLE" default="true">
+            <includes vendor-id="postgresql"/>
+            <includes vendor-id="sybase"/>
+        </mapping>
+
+        <mapping java-type="java.lang.Integer" rdbms-mapping-class="org.jpox.store.rdbms.mapping.IntegerRDBMSMapping" jdbc-type="INTEGER" sql-type="INTEGER" default="true">
+            <excludes vendor-id="sqlserver"/>
+        </mapping>
+        <mapping java-type="java.lang.Integer" rdbms-mapping-class="org.jpox.store.rdbms.mapping.BigIntRDBMSMapping" jdbc-type="BIGINT" sql-type="BIGINT" default="false">
+            <excludes vendor-id="sapdb"/>
+            <excludes vendor-id="sybase"/>
+        </mapping>
+        <mapping java-type="java.lang.Integer" rdbms-mapping-class="org.jpox.store.rdbms.mapping.NumericRDBMSMapping" jdbc-type="NUMERIC" sql-type="NUMERIC" default="false">
+            <excludes vendor-id="sapdb"/>
+        </mapping>
+        <mapping java-type="java.lang.Integer" rdbms-mapping-class="org.jpox.store.rdbms.mapping.IntegerRDBMSMapping" jdbc-type="INTEGER" sql-type="INT" default="true">
+            <includes vendor-id="derby"/>
+            <includes vendor-id="sapdb"/>
+            <includes vendor-id="sqlserver"/>
+            <includes vendor-id="sybase"/>
+        </mapping>
+        <mapping java-type="java.lang.Integer" rdbms-mapping-class="org.jpox.store.rdbms.mapping.NumericRDBMSMapping" jdbc-type="NUMERIC" sql-type="NUMERIC" default="true">
+            <includes vendor-id="oracle"/>
+        </mapping>
+
+        <mapping java-type="java.lang.Long" rdbms-mapping-class="org.jpox.store.rdbms.mapping.BigIntRDBMSMapping" jdbc-type="BIGINT" sql-type="BIGINT" default="true">
+            <excludes vendor-id="sapdb"/>
+            <excludes vendor-id="sybase"/>
+        </mapping>
+        <mapping java-type="java.lang.Long" rdbms-mapping-class="org.jpox.store.rdbms.mapping.NumericRDBMSMapping" jdbc-type="NUMERIC" sql-type="NUMERIC" default="false">
+            <excludes vendor-id="sapdb"/>
+        </mapping>
+        <mapping java-type="java.lang.Long" rdbms-mapping-class="org.jpox.store.rdbms.mapping.DoubleRDBMSMapping" jdbc-type="DOUBLE" sql-type="DOUBLE" default="false">
+            <includes vendor-id="sapdb"/>
+        </mapping>
+        <mapping java-type="java.lang.Long" rdbms-mapping-class="org.jpox.store.rdbms.mapping.DecimalRDBMSMapping" jdbc-type="DECIMAL" sql-type="NUMERIC" default="true">
+            <includes vendor-id="sapdb"/>
+        </mapping>
+        <mapping java-type="java.lang.Long" rdbms-mapping-class="org.jpox.store.rdbms.mapping.IntegerRDBMSMapping" jdbc-type="INTEGER" sql-type="INT" default="true">
+            <includes vendor-id="sybase"/>
+        </mapping>
+        <mapping java-type="java.lang.Long" rdbms-mapping-class="org.jpox.store.rdbms.mapping.NumericRDBMSMapping" jdbc-type="NUMERIC" sql-type="NUMERIC" default="true">
+            <includes vendor-id="oracle"/>
+        </mapping>
+
+        <mapping java-type="java.lang.Short" rdbms-mapping-class="org.jpox.store.rdbms.mapping.SmallIntRDBMSMapping" jdbc-type="SMALLINT" sql-type="SMALLINT" default="true"/>
+        <mapping java-type="java.lang.Short" rdbms-mapping-class="org.jpox.store.rdbms.mapping.IntegerRDBMSMapping" jdbc-type="INTEGER" sql-type="INTEGER" default="false">
+            <excludes vendor-id="sqlserver"/>
+        </mapping>
+        <mapping java-type="java.lang.Short" rdbms-mapping-class="org.jpox.store.rdbms.mapping.IntegerRDBMSMapping" jdbc-type="INTEGER" sql-type="INT" default="false">
+            <includes vendor-id="derby"/>
+            <includes vendor-id="sapdb"/>
+            <includes vendor-id="sqlserver"/>
+            <includes vendor-id="sybase"/>
+        </mapping>
+        <mapping java-type="java.lang.Short" rdbms-mapping-class="org.jpox.store.rdbms.mapping.NumericRDBMSMapping" jdbc-type="NUMERIC" sql-type="NUMERIC" default="true">
+            <includes vendor-id="oracle"/>
+        </mapping>
+
+        <mapping java-type="java.lang.String" rdbms-mapping-class="org.jpox.store.rdbms.mapping.VarCharRDBMSMapping" jdbc-type="VARCHAR" sql-type="VARCHAR" default="true"/>
+        <mapping java-type="java.lang.String" rdbms-mapping-class="org.jpox.store.rdbms.mapping.CharRDBMSMapping" jdbc-type="CHAR" sql-type="CHAR" default="false"/>
+        <mapping java-type="java.lang.String" rdbms-mapping-class="org.jpox.store.rdbms.mapping.LongVarcharRDBMSMapping" jdbc-type="LONGVARCHAR" sql-type="LONGVARCHAR" default="false"/>
+        <mapping java-type="java.lang.String" rdbms-mapping-class="org.jpox.store.rdbms.mapping.ClobRDBMSMapping" jdbc-type="CLOB" sql-type="CLOB" default="false">
+            <excludes vendor-id="oracle"/>
+        </mapping>
+        <mapping java-type="java.lang.String" rdbms-mapping-class="org.jpox.store.rdbms.mapping.oracle.OracleClobRDBMSMapping" jdbc-type="CLOB" sql-type="CLOB" default="false">
+            <includes vendor-id="oracle"/>
+        </mapping>
+        <mapping java-type="java.lang.String" rdbms-mapping-class="org.jpox.store.rdbms.mapping.BlobRDBMSMapping" jdbc-type="BLOB" sql-type="BLOB" default="false">
+            <excludes vendor-id="oracle"/>
+        </mapping>
+        <mapping java-type="java.lang.String" rdbms-mapping-class="org.jpox.store.rdbms.mapping.oracle.OracleBlobRDBMSMapping" jdbc-type="BLOB" sql-type="BLOB" default="false">
+            <includes vendor-id="oracle"/>
+        </mapping>
+        <mapping java-type="java.lang.String" rdbms-mapping-class="org.jpox.store.rdbms.mapping.DatalinkRDBMSMapping" jdbc-type="DATALINK" sql-type="DATALINK" default="false">
+            <includes vendor-id="db2"/>
+        </mapping>
+        <mapping java-type="java.lang.String" rdbms-mapping-class="org.jpox.store.rdbms.mapping.CharRDBMSMapping" jdbc-type="CHAR" sql-type="UNIQUEIDENTIFIER" default="false">
+            <includes vendor-id="sqlserver"/>
+        </mapping>
+    
+        <mapping java-type="java.math.BigDecimal" rdbms-mapping-class="org.jpox.store.rdbms.mapping.DecimalRDBMSMapping" jdbc-type="DECIMAL" sql-type="DECIMAL" default="true">
+            <excludes vendor-id="postgresql"/>
+        </mapping>
+        <mapping java-type="java.math.BigDecimal" rdbms-mapping-class="org.jpox.store.rdbms.mapping.NumericRDBMSMapping" jdbc-type="NUMERIC" sql-type="NUMERIC" default="false">
+            <excludes vendor-id="sapdb"/>
+        </mapping>
+        <mapping java-type="java.math.BigDecimal" rdbms-mapping-class="org.jpox.store.rdbms.mapping.NumericRDBMSMapping" jdbc-type="NUMERIC" sql-type="NUMERIC" default="false">
+            <includes vendor-id="postgresql"/>
+        </mapping>
+        <mapping java-type="java.math.BigDecimal" rdbms-mapping-class="org.jpox.store.rdbms.mapping.NumericRDBMSMapping" jdbc-type="NUMERIC" sql-type="NUMERIC" default="true">
+            <includes vendor-id="oracle"/>
+        </mapping>
+
+        <mapping java-type="java.math.BigInteger" rdbms-mapping-class="org.jpox.store.rdbms.mapping.NumericRDBMSMapping" jdbc-type="NUMERIC" sql-type="NUMERIC" default="true">
+            <excludes vendor-id="sapdb"/>
+        </mapping>
+        <mapping java-type="java.math.BigInteger" rdbms-mapping-class="org.jpox.store.rdbms.mapping.DecimalRDBMSMapping" jdbc-type="DECIMAL" sql-type="NUMERIC" default="true">
+            <includes vendor-id="sapdb"/>
+        </mapping>
+    
+        <mapping java-type="java.sql.Date" rdbms-mapping-class="org.jpox.store.rdbms.mapping.DateRDBMSMapping" jdbc-type="DATE" sql-type="DATE" default="true">
+            <excludes vendor-id="sqlserver"/>
+        </mapping>
+        <mapping java-type="java.sql.Date" rdbms-mapping-class="org.jpox.store.rdbms.mapping.TimestampRDBMSMapping" jdbc-type="TIMESTAMP" sql-type="TIMESTAMP" default="false"/>
+    
+        <mapping java-type="java.sql.Time" rdbms-mapping-class="org.jpox.store.rdbms.mapping.TimeRDBMSMapping" jdbc-type="TIME" sql-type="TIME" default="true">
+            <excludes vendor-id="sqlserver"/>
+        </mapping>
+        <mapping java-type="java.sql.Time" rdbms-mapping-class="org.jpox.store.rdbms.mapping.TimestampRDBMSMapping" jdbc-type="TIMESTAMP" sql-type="TIMESTAMP" default="false"/>
+    
+        <mapping java-type="java.sql.Timestamp" rdbms-mapping-class="org.jpox.store.rdbms.mapping.TimestampRDBMSMapping" jdbc-type="TIMESTAMP" sql-type="TIMESTAMP" default="true"/>
+    
+        <mapping java-type="java.util.Date" rdbms-mapping-class="org.jpox.store.rdbms.mapping.TimestampRDBMSMapping" jdbc-type="TIMESTAMP" sql-type="TIMESTAMP" default="true"/>
+        <mapping java-type="java.util.Date" rdbms-mapping-class="org.jpox.store.rdbms.mapping.DateRDBMSMapping" jdbc-type="DATE" sql-type="DATE" default="false">
+            <excludes vendor-id="sqlserver"/>
+        </mapping>
+        <mapping java-type="java.util.Date" rdbms-mapping-class="org.jpox.store.rdbms.mapping.CharRDBMSMapping" jdbc-type="CHAR" sql-type="CHAR" default="false"/>
+        <mapping java-type="java.util.Date" rdbms-mapping-class="org.jpox.store.rdbms.mapping.BigIntRDBMSMapping" jdbc-type="BIGINT" sql-type="BIGINT" default="false">
+            <excludes vendor-id="sapdb"/>
+            <excludes vendor-id="sybase"/>
+        </mapping>
+
+        <mapping java-type="java.io.Serializable" rdbms-mapping-class="org.jpox.store.rdbms.mapping.LongVarBinaryRDBMSMapping" jdbc-type="LONGVARBINARY" sql-type="LONGVARBINARY" default="true">
+            <excludes vendor-id="oracle"/>
+        </mapping>
+        <mapping java-type="java.io.Serializable" rdbms-mapping-class="org.jpox.store.rdbms.mapping.BlobRDBMSMapping" jdbc-type="BLOB" sql-type="BLOB" default="false">
+            <excludes vendor-id="oracle"/>
+        </mapping>
+        <mapping java-type="java.io.Serializable" rdbms-mapping-class="org.jpox.store.rdbms.mapping.VarBinaryRDBMSMapping" jdbc-type="VARBINARY" sql-type="VARBINARY" default="false">
+            <excludes vendor-id="oracle"/>
+        </mapping>
+        <mapping java-type="java.io.Serializable" rdbms-mapping-class="org.jpox.store.rdbms.mapping.oracle.OracleBlobRDBMSMapping" jdbc-type="BLOB" sql-type="BLOB" default="true">
+            <includes vendor-id="oracle"/>
+        </mapping>
+
+        <mapping java-type="org.jpox.store.OID" rdbms-mapping-class="org.jpox.store.rdbms.mapping.BigIntRDBMSMapping" jdbc-type="BIGINT" sql-type="BIGINT" default="true">
+            <excludes vendor-id="sapdb"/>
+            <excludes vendor-id="sybase"/>
+        </mapping>
+        <mapping java-type="org.jpox.store.OID" rdbms-mapping-class="org.jpox.store.rdbms.mapping.IntegerRDBMSMapping" jdbc-type="INTEGER" sql-type="INTEGER" default="false">
+            <excludes vendor-id="sqlserver"/>
+        </mapping>
+        <mapping java-type="org.jpox.store.OID" rdbms-mapping-class="org.jpox.store.rdbms.mapping.NumericRDBMSMapping" jdbc-type="NUMERIC" sql-type="NUMERIC" default="false">
+            <excludes vendor-id="sapdb"/>
+        </mapping>
+        <mapping java-type="org.jpox.store.OID" rdbms-mapping-class="org.jpox.store.rdbms.mapping.CharRDBMSMapping" jdbc-type="CHAR" sql-type="CHAR" default="false"/>
+        <mapping java-type="org.jpox.store.OID" rdbms-mapping-class="org.jpox.store.rdbms.mapping.VarCharRDBMSMapping" jdbc-type="VARCHAR" sql-type="VARCHAR" default="false"/>
+        <mapping java-type="org.jpox.store.OID" rdbms-mapping-class="org.jpox.store.rdbms.mapping.IntegerRDBMSMapping" jdbc-type="INTEGER" sql-type="INT" default="true">
+            <includes vendor-id="sqlserver"/>
+            <includes vendor-id="sapdb"/>
+            <includes vendor-id="sybase"/>
+        </mapping>
+        <mapping java-type="org.jpox.store.OID" rdbms-mapping-class="org.jpox.store.rdbms.mapping.NumericRDBMSMapping" jdbc-type="NUMERIC" sql-type="NUMERIC" default="true">
+            <includes vendor-id="oracle"/>
+        </mapping>
+    </extension>
+
+    <!-- DATASTORE ADAPTERS -->
+    <extension point="org.jpox.store_datastoreadapter">
+        <datastore-adapter vendor-id="derby" class-name="org.jpox.store.rdbms.adapter.DerbyAdapter" secondary="false"/>
+        <datastore-adapter vendor-id="Apache Derby" class-name="org.jpox.store.rdbms.adapter.DerbyAdapter" secondary="false"/>
+        <datastore-adapter vendor-id="cloudscape" class-name="org.jpox.store.rdbms.adapter.DerbyAdapter" secondary="false"/>
+        <datastore-adapter vendor-id="db2" class-name="org.jpox.store.rdbms.adapter.DB2Adapter" secondary="false"/>
+        <datastore-adapter vendor-id="as/400" class-name="org.jpox.store.rdbms.adapter.DB2AS400Adapter" secondary="true"/>
+        <datastore-adapter vendor-id="firebird" class-name="org.jpox.store.rdbms.adapter.FirebirdAdapter" secondary="false"/>
+        <datastore-adapter vendor-id="interbase" class-name="org.jpox.store.rdbms.adapter.FirebirdAdapter" secondary="false"/>
+        <datastore-adapter vendor-id="microsoft" class-name="org.jpox.store.rdbms.adapter.MSSQLServerAdapter" secondary="false"/>
+        <datastore-adapter vendor-id="h2" class-name="org.jpox.store.rdbms.adapter.H2Adapter" secondary="false"/>
+        <datastore-adapter vendor-id="hsql" class-name="org.jpox.store.rdbms.adapter.HSQLAdapter" secondary="false"/>
+        <datastore-adapter vendor-id="mckoi" class-name="org.jpox.store.rdbms.adapter.McKoiAdapter" secondary="false"/>
+        <datastore-adapter vendor-id="mysql" class-name="org.jpox.store.rdbms.adapter.MySQLAdapter" secondary="false"/>
+        <datastore-adapter vendor-id="Adaptive Server Anywhere" class-name="org.jpox.store.rdbms.adapter.SybaseAdapter" secondary="false"/>
+        <datastore-adapter vendor-id="Adaptive Server Enterprise" class-name="org.jpox.store.rdbms.adapter.SybaseAdapter" secondary="false"/>
+        <datastore-adapter vendor-id="Adaptive Server IQ" class-name="org.jpox.store.rdbms.adapter.SybaseAdapter" secondary="false"/>
+        <datastore-adapter vendor-id="sybase" class-name="org.jpox.store.rdbms.adapter.SybaseAdapter" secondary="false"/>
+        <datastore-adapter vendor-id="oracle" class-name="org.jpox.store.rdbms.adapter.OracleAdapter" secondary="false"/>
+        <datastore-adapter vendor-id="pointbase" class-name="org.jpox.store.rdbms.adapter.PointbaseAdapter" secondary="false"/>
+        <datastore-adapter vendor-id="postgresql" class-name="org.jpox.store.rdbms.adapter.PostgreSQLAdapter" secondary="false"/>
+        <datastore-adapter vendor-id="sapdb" class-name="org.jpox.store.rdbms.adapter.SAPDBAdapter" secondary="false"/>
+        <datastore-adapter vendor-id="sap db" class-name="org.jpox.store.rdbms.adapter.SAPDBAdapter" secondary="false"/>
+        <datastore-adapter vendor-id="informix" class-name="org.jpox.store.rdbms.adapter.InformixAdapter" secondary="false"/>
+    </extension>
+
+    <!-- JDOQL EXPRESSIONS -->
+    <extension point="org.jpox.store_expression_scalarexpression">
+        <scalar-expression literal-class="java.lang.Math" scalar-expression-class="org.jpox.store.expression.MathExpression"/>
+        <scalar-expression literal-class="javax.jdo.JDOHelper" scalar-expression-class="org.jpox.store.expression.JDOHelperExpression"/>
+        <!-- there is no literal expression for analysis, so we put the name -->
+        <scalar-expression name="Analysis" scalar-expression-class="org.jpox.store.rdbms.expression.AnalysisExpression"/>
+    </extension>
+
+    <!-- STORE MANAGER -->
+    <extension point="org.jpox.store_manager">
+        <store-manager class-name="org.jpox.store.rdbms.RDBMSManager" key="jdbc"/>
+    </extension>
+
+    <!-- QUERY LANGUAGES -->
+    <extension point="org.jpox.store_query_query">
+        <query class-name="org.jpox.store.rdbms.query.JDOQLQuery" datastore="jdbc" name="javax.jdo.query.JDOQL"/>
+        <query class-name="org.jpox.store.rdbms.query.SQLQuery" datastore="jdbc" name="javax.jdo.query.SQL"/>
+        <query class-name="org.jpox.store.rdbms.query.JPOXSQLQuery" datastore="jdbc" name="javax.jdo.query.JPOXSQL"/>
+    </extension>
+
+    <!-- PERSISTENCE APIS -->
+    <extension point="org.jpox.api_adapter">
+        <api-adapter name="JDO" class-name="org.jpox.api.JDOAdapter"/>
+        <api-adapter name="JPA" class-name="org.jpox.api.JPAAdapter"/>
+    </extension>
+
+    <!-- CLASS LOADERS -->
+    <extension point="org.jpox.classloader_resolver">
+        <class-loader-resolver name="jdo" class-name="org.jpox.JDOClassLoaderResolver"/>
+    </extension>
+
+    <!-- AUTOSTART MECHANISMS -->
+    <extension point="org.jpox.autostart">
+        <autostart class-name="org.jpox.store.ClassesAutoStarter" name="Classes"/>
+        <autostart class-name="org.jpox.store.XMLAutoStarter" name="XML"/>
+        <autostart class-name="org.jpox.store.rdbms.SchemaAutoStarter" name="SchemaTable"/>
+    </extension>
+
+    <!-- CALLBACK HANDLERS -->
+    <extension point="org.jpox.callbackhandler">
+        <callback-handler class-name="org.jpox.state.JDOCallbackHandler" name="JDO"/>
+    </extension>
+
+    <!-- METADATA HANDLERS -->
+    <extension point="org.jpox.metadata_handler">
+        <handler class-name="org.jpox.metadata.JDOMetaDataHandler" name="JDO" entity-resolver="org.jpox.metadata.JDOEntityResolver"/>
+        <handler class-name="org.jpox.metadata.JPAMetaDataHandler" name="JPA" entity-resolver="org.jpox.metadata.JPAEntityResolver"/>
+        <handler class-name="org.jpox.metadata.PersistenceFileMetaDataHandler" name="Persistence"
+            entity-resolver="org.jpox.metadata.JPAEntityResolver"/>
+    </extension>
+</plugin>

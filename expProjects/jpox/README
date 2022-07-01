@@ -1,0 +1,10 @@
+Java Persistent Objects (JPOX)
+==============================
+JPOX is a Java Data Objects (JDO) implementation providing transparent persistent for normal Java objects. 
+JPOX supports persistence to RDBMS databases, creation of schemas, as well as use of existing schemas.
+JPOX is Open Source, meaning that the source code is available for download. Use of JPOX and its source code is governed by the included LICENSE.txt.
+Please refer to http://www.jpox.org for the latest news and functionality of JPOX.
+
+We hope you enjoy using this software.
+--
+The JPOX Team

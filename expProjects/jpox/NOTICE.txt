@@ -1,0 +1,35 @@
+=========================================================================
+==  NOTICE file corresponding to section 4(d) of the Apache License,   ==
+==  Version 2.0, in this case for the JPOX distribution.               ==
+=========================================================================
+
+===================================================================
+This product includes software developed by many individuals,
+including the following:
+===================================================================
+Erik Bengtson
+Andy Jefferson
+Michael Grundmann
+Joerg von Frantzius
+
+
+===================================================================
+This product has included contributions from some individuals,
+including the following:
+===================================================================
+Barry Haddow
+Marco Schulze
+Ralph Ullrich
+David Ezzio
+Brendan de Beer
+David Eaves
+Martin Taal
+Tony Lai
+Kikuchi Kousuke
+Roland Szabo
+
+
+===================================================================
+This product also includes software developed by the TJDO project
+(http://tjdo.sourceforge.net/).
+===================================================================
